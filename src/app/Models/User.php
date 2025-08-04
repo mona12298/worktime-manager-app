@@ -21,6 +21,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'is_admin'
     ];
 
     /**
@@ -41,4 +42,17 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    public function attendances(){
+        return $this->hasMany('App\Models\Attendance');
+    }
+
+    public function correctionRequests(){
+        return $this->hasMany('App\Models\CorrectionRequest');
+    }
+
+    public function isAdmin(){
+        return $this->is_admin;
+    }
 }
+

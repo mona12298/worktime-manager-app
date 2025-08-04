@@ -1,0 +1,333 @@
+.wrapper {
+    background-color: #F0EFF2;
+    width: 100%;
+    min-height: 100vh;
+}
+
+.content {
+    width: 900px;
+    padding: 91px 0;
+    margin: 0 auto;
+}
+
+.ttl {
+    width: 400px;
+    display: flex;
+    gap: 21px;
+    margin-bottom: 41px;
+}
+
+.ttl-left {
+    border-left: 8px solid #000000;
+}
+
+.ttl-txt {
+    font-weight: 700;
+    font-size: 30px;
+}
+
+.change-day {
+    height: 60px;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 41px;
+    background-color: #ffffff;
+    border-radius: 10px;
+    padding: 0 25px;
+}
+
+.change-day__before,
+.change-day__current,
+.change-day__after {
+    display: flex;
+    white-space: nowrap;
+    justify-content: center;
+    align-items: center;
+}
+
+.change-day__before {
+    gap: 5px;
+}
+
+.change-day__before img,
+.change-day__after img {
+    width: 20px;
+    height: 15px;
+    filter: brightness(0) saturate(100%) invert(86%) sepia(0%) saturate(0%) hue-rotate(170deg) brightness(93%) contrast(86%);
+}
+
+.change-day__current {
+    width: 25px;
+    height: 25px;
+    gap: 11px;
+}
+
+.change-day__current p {
+    width: auto;
+    height: 24px;
+    line-height: 24px;
+    font-weight: 700;
+    font-size: 20px;
+}
+
+.change-day__after {
+    gap: 5px;
+    flex-direction: row-reverse;
+}
+
+.change-day__after img {
+    transform: rotate(180deg);
+}
+
+.change-day__before a,
+.change-day__after a {
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 16px;
+    color: #737373;
+}
+
+.table {
+    width: 100%;
+    background-color: #FFFFFF;
+    border-spacing: 0;
+    border-radius: 10px;
+}
+
+.first-tr th {
+    border-bottom: 3px solid #E1E1E1;
+    font-weight: 700;
+    font-size: 16px;
+    color: #737373;
+    height: 47px;
+}
+
+.table th:first-of-type,
+.table td:first-of-type {
+    width: 197px;
+    padding-left: 57px;
+    text-align: left;
+}
+
+.table th:nth-child(2),
+.table th:nth-child(3),
+.table th:nth-child(4),
+.table th:nth-child(5) {
+    width: 133px;
+}
+
+.table th:nth-child(6),
+.table td:nth-child(6) {
+    padding-right: 87px;
+    text-align: right;
+}
+
+.table tr {
+    width: 100%;
+    text-align: center;
+    padding-top: 15px;
+    height: 47px;
+    border-bottom: 2px solid #E1E1E1;
+}
+
+.table tr:last-of-type {
+    border: none;
+}
+
+.table td {
+    font-weight: 700;
+    font-size: 16px;
+    color: #737373;
+}
+
+.table a {
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 16px;
+    color: #000000;
+}
+
+@media (min-width: 1400px) and (max-width: 1540px) {
+    .content {
+        width: 1000px;
+        padding: 101px 0;
+    }
+
+    .ttl {
+        width: 500px;
+        margin-bottom: 51px;
+        gap: 25px;
+    }
+
+    .ttl-txt {
+        font-size: 32px;
+    }
+
+    .change-day {
+        height: 70px;
+        margin-bottom: 51px;
+        padding: 0 30px;
+    }
+
+    .change-day__before,
+    .change-day__after {
+        gap: 10px;
+    }
+
+    .change-day__before img,
+    .change-day__after img {
+        width: 25px;
+        height: 20px;
+    }
+
+    .change-day__current {
+        width: 30px;
+        height: 30px;
+        gap: 16px;
+    }
+
+    .change-day__current p {
+        height: 30px;
+        line-height: 30px;
+        font-size: 22px;
+    }
+
+    .change-day__before a,
+    .change-day__after a {
+        font-size: 18px;
+    }
+
+    .first-tr th {
+        border-bottom: 4px solid #E1E1E1;
+        font-size: 18px;
+        height: 52px;
+    }
+
+    .table th:first-of-type,
+    .table td:first-of-type {
+        width: 217px;
+        padding-left: 67px;
+    }
+
+    .table th:nth-child(2),
+    .table th:nth-child(3),
+    .table th:nth-child(4),
+    .table th:nth-child(5) {
+        width: 149px;
+    }
+
+    .table td:nth-child(6) {
+        padding-right: 92px;
+    }
+
+    .table tr {
+        height: 52px;
+        border-bottom: 3px solid #E1E1E1;
+    }
+
+    .table td {
+        font-size: 18px;
+    }
+
+    .table a {
+        font-size: 18px;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 850px) {
+    .content {
+        width: 680px;
+        padding: 50px 0 100px;
+        margin: 0 auto;
+    }
+
+    .ttl {
+        width: 350px;
+        gap: 16px;
+        margin-bottom: 31px;
+    }
+
+    .ttl-left {
+        border-left: 5px solid #000000;
+    }
+
+    .ttl-txt {
+        font-size: 18px;
+    }
+
+    .change-day {
+        height: 35px;
+        margin-bottom: 31px;
+        padding: 0 15px;
+    }
+
+    .change-day__before,
+    .change-day__after {
+        gap: 3px;
+    }
+
+    .change-day__before img,
+    .change-day__after img {
+        width: 13px;
+        height: 8px;
+    }
+
+    .change-day__current {
+        width: 15px;
+        height: 15px;
+        gap: 7px;
+    }
+
+    .change-day__current p {
+        height: 20px;
+        line-height: 20px;
+        font-size: 14px;
+    }
+
+    .change-day__before a,
+    .change-day__after a {
+        font-size: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .first-tr th {
+        border-bottom: 2px solid #E1E1E1;
+        font-size: 12px;
+        height: 30px;
+    }
+
+    .table th:first-of-type,
+    .table td:first-of-type{
+        width: 161px;
+        padding-left: 50px;
+    }
+
+    .table th:nth-child(2),
+    .table th:nth-child(3),
+    .table th:nth-child(4),
+    .table th:nth-child(5) {
+        width: 97px;
+    }
+
+    .table td:nth-child(6) {
+        padding-right: 60px;
+    }
+
+    .table tr {
+        padding-top: 7px;
+        height: 30px;
+        border-bottom: 1px solid #E1E1E1;
+    }
+
+    .table td {
+        font-size: 12px;
+    }
+
+    .table a {
+        font-size: 12px;
+    }
+}
