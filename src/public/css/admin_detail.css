@@ -1,0 +1,275 @@
+.wrapper {
+    background-color: #F0EFF2;
+    width: 100%;
+    min-height: 100vh;
+}
+
+.content {
+    width: 900px;
+    min-height: 555px;
+    padding-top: 93px;
+    margin: 0 auto;
+}
+
+.ttl {
+    width: 150px;
+    display: flex;
+    gap: 21px;
+    margin-bottom: 55px;
+}
+
+.ttl-left {
+    border-left: 8px solid #000000;
+}
+
+.ttl-txt {
+    font-weight: 700;
+    font-size: 30px;
+}
+
+.table {
+    background-color: #ffffff;
+    width: 100%;
+    height: 100%;
+    letter-spacing: 0.1em;
+    border-radius: 10px;
+}
+
+.table tr {
+    border-bottom: 2px solid #E1E1E1;
+    min-height: 90px;
+    display: flex;
+    align-items: center;
+}
+
+.table tr:last-child {
+    border-bottom: none;
+    height: 106px;
+}
+
+.table th {
+    font-weight: 700;
+    font-size: 16px;
+    color: #737373;
+    height: 47px;
+    line-height: 47px;
+    padding-left: 54px;
+    text-align: left;
+    width: 323px;
+}
+
+.table td {
+    font-weight: 700;
+    font-size: 16px;
+}
+
+.year,
+.name {
+    padding-left: 24px;
+}
+
+.date {
+    padding-left: 142px;
+}
+
+.range-separator {
+    padding: 0 51px 0 43px;
+}
+
+.table-input__in,
+.table-input__out {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    width: 103px;
+    height: 29px;
+    border-radius: 4px;
+    border: 1px solid #E1E1E1;
+    display: inline-block;
+    text-align: center;
+    letter-spacing: 0.1em;
+    font-weight: 700;
+    font-size: 16px;
+}
+
+.table-textarea textarea {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    min-width: 316px;
+    min-height: 72px;
+    border-radius: 4px;
+    border: 1px solid #D9D9D9;
+}
+
+.form-btn {
+    padding: 36px 0 77px;
+    text-align: right;
+}
+
+.form-btn input {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    width: 130px;
+    height: 50px;
+    border-radius: 5px;
+    background-color: #000000;
+    border: none;
+    color: #ffffff;
+    text-align: center;
+    font-weight: 700;
+    font-size: 22px;
+}
+
+@media (min-width: 1400px) and (max-width: 1540px) {
+    .content {
+        width: 1000px;
+        min-height: 600px;
+        padding-top: 103px;
+    }
+
+    .ttl {
+        width: 180px;
+        gap: 25px;
+        margin-bottom: 55px;
+    }
+
+    .ttl-txt {
+        font-size: 32px;
+    }
+
+    .table tr {
+        min-height: 95px;
+    }
+
+    .table tr:last-child {
+        height: 116px;
+    }
+
+    .table th {
+        font-weight: 700;
+        font-size: 18px;
+        height: 52px;
+        line-height: 52px;
+        padding-left: 59px;
+        width: 333px;
+    }
+
+    .table td {
+        font-size: 18px;
+    }
+
+    .year,
+    .name {
+        padding-left: 24px;
+    }
+
+    .date {
+        padding-left: 142px;
+    }
+
+    .range-separator {
+        padding: 0 56px 0 48px;
+    }
+
+    .table-input__in,
+    .table-input__out {
+        width: 108px;
+        height: 34px;
+        font-size: 18px;
+    }
+
+
+    .table-textarea textarea {
+        min-width: 341px;
+        min-height: 77px;
+        border-radius: 4px;
+    }
+
+    .form-btn {
+        padding: 46px 0 87px;
+    }
+
+    .form-btn input {
+        width: 140px;
+        height: 60px;
+        font-size: 24px;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 850px) {
+    .content {
+        width: 680px;
+        min-height: 300px;
+        padding-top: 40px;
+    }
+
+    .ttl {
+        width: 100px;
+        gap: 16px;
+        margin-bottom: 31px;
+    }
+
+    .ttl-left {
+        border-left: 5px solid #000000;
+    }
+
+    .ttl-txt {
+        font-size: 18px;
+    }
+
+    .table tr {
+        border-bottom: 2px solid #E1E1E1;
+        min-height: 50px;
+    }
+
+    .table tr:last-child {
+        height: 100px;
+    }
+
+    .table th {
+        font-size: 12px;
+        height: 30px;
+        line-height: 30px;
+    }
+
+    .table td {
+        font-size: 12px;
+    }
+
+    .year,
+    .name {
+        padding-left: 18px;
+    }
+
+    .date {
+        padding-left: 117px;
+    }
+
+    .range-separator {
+        padding: 0 41px 0 33px;
+    }
+
+    .table-input__in,
+    .table-input__out {
+        width: 83px;
+        height: 25px;
+        font-size: 12px;
+    }
+
+    .table-textarea textarea {
+        min-width: 260px;
+        min-height: 72px;
+    }
+
+    .form-btn {
+        padding: 20px 0 50px;
+    }
+
+    .form-btn input {
+        width: 90px;
+        height: 40px;
+        font-size: 18px;
+    }
+}
