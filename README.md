@@ -17,6 +17,77 @@ config/app.php で 'timezone' => 'Asia/Tokyo',へ変更<br>
 .env に SESSION_COOKIE=laravel_session を追加
 </p>
 
+<h2>テーブル構造</h2>
+
+<h3>usersテーブル</h3>
+
+| カラム名    | 型               | NULL許可 | 外部キー         | 備考           |
+|-------------|------------------|----------|------------------|----------------|
+| id          | unsigned bigint   | NO       |                  | 主キー         |
+| name        | varchar          | YES      |                  |                |
+| email       | varchar          | YES      |                  |                |
+| password    | varchar          | YES      |                  |                |
+| created_at  | timestamp        | YES      |                  |                |
+| updated_at  | timestamp        | YES      |                  |                |
+
+---
+
+<h3>attendancesテーブル</h3>
+
+| カラム名   | 型               | NULL許可 | 外部キー         | 備考           |
+|------------|------------------|----------|------------------|----------------|
+| id         | unsigned bigint   | NO       |                  | 主キー         |
+| user_id    | unsigned bigint   | YES      | users(id)        |                |
+| clock_in   | datetime         | YES      |                  |                |
+| clock_out  | datetime         | YES      |                  |                |
+| created_at | timestamp        | YES      |                  |                |
+| updated_at | timestamp        | YES      |                  |                |
+
+---
+
+<h3>correction_requestsテーブル</h3>
+
+| カラム名        | 型                         | NULL許可 | 外部キー           | 備考                              |
+|-----------------|----------------------------|----------|--------------------|-----------------------------------|
+| id              | unsigned bigint            | NO       |                    | 主キー                            |
+| user_id         | unsigned bigint            | YES      | users(id)          |                                   |
+| attendance_id   | unsigned bigint            | YES      | attendances(id)    |                                   |
+| work_break_id   | unsigned bigint            | YES      | work_breaks(id)    |                                   |
+| column_name     | enum('clock_in','clock_out','start','end') | YES |                    | 修正対象カラム名                  |
+| original_value  | datetime                  | YES      |                    | 修正前の値                       |
+| corrected_value | datetime                  | YES      |                    | 修正後の値                       |
+| reason          | text                      | YES      |                    | 修正理由                        |
+| status          | enum('pending','approved') | YES      |                    | ステータス（保留 or 承認済み）  |
+| created_at      | timestamp                 | YES      |                    |                                   |
+| updated_at      | timestamp                 | YES      |                    |                                   |
+
+---
+
+<h3>work_breaksテーブル</h3>
+
+| カラム名       | 型                      | NULL許可 | 外部キー           | 備考            |
+|----------------|-------------------------|----------|--------------------|-----------------|
+| id             | unsigned bigint         | NO       |                    | 主キー          |
+| attendance_id  | unsigned bigint         | YES      | attendances(id)    |                 |
+| break_type     | enum('start','end')     | YES      |                    | 休憩開始・終了  |
+| occurred_at    | datetime                | YES      |                    | 休憩時間        |
+| created_at     | timestamp               | YES      |                    |                 |
+| updated_at     | timestamp               | YES      |                    |                 |
+
+---
+
+<h3>adminsテーブル</h3>
+
+| カラム名    | 型               | NULL許可 | 外部キー | 備考    |
+|-------------|------------------|----------|----------|---------|
+| id          | unsigned bigint   | YES      |          | 主キー  |
+| name        | varchar          | YES      |          |         |
+| email       | varchar          | YES      |          |         |
+| password    | varchar          | YES      |          |         |
+| created_at  | timestamp        | YES      |          |         |
+| updated_at  | timestamp        | YES      |          |         |
+
+
 <h2>使用技術</h2>
 <p>言語: php 7.4.9</p>
 <p>フレームワーク: Laravel 8.83.8</p>
