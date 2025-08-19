@@ -24,8 +24,11 @@
         </div>
         <div class="form__error">
             @error('password')
-            {{ $message }}
+            {{ $message }}<br>
             @enderror
+            @if ($errors->has('auth'))
+            {{ $errors->first('auth') }}<br>
+            @endif
         </div>
         <div class="form-btn">
             <input type="submit" value="管理者ログインする">

@@ -47,11 +47,22 @@
 }
 
 .tab-content {
-    display: none;
+    position: absolute;
+    left: -9999px;
+    opacity: 0;
+    pointer-events: none;
+    height: 0;
+    overflow: hidden;
+    transition: opacity 0.3s ease;
 }
 
 .tab-content.active {
-    display: block;
+    position: static;
+    left: 0;
+    opacity: 1;
+    pointer-events: auto;
+    height: auto;
+    overflow: visible;
 }
 
 .table {
@@ -60,14 +71,10 @@
     font-size: 16px;
     color: #737373;
     border-bottom: 2px solid #E1E1E1;
-    background-color: #ffffff;
+    background-color: #fff;
     border-radius: 10px;
-    letter-spacing: 0.15em;
-}
-
-th:not(:nth-child(4)),
-td:not(:nth-child(4)) {
-    white-space: nowrap;
+    letter-spacing: 0.1em;
+    border-collapse: collapse;
 }
 
 .table a {
@@ -81,45 +88,56 @@ td:not(:nth-child(4)) {
 
 .table tr {
     height: 46px;
+    border-bottom: 2px solid #E1E1E1;
 }
 
-td:nth-child(1),
-th:nth-child(1) {
-    min-width: 72px;
+th,
+td {
+    height: 46px;
+    padding-left: 15px;
+    padding-right: 15px;
+    vertical-align: middle;
+    box-sizing: border-box;
 }
 
-th:nth-child(1) {
-    padding-left: 55px;
-}
-
+th:nth-child(1),
 td:nth-child(1) {
-    padding-left: 37px;
+    min-width: 72px;
+    text-align: center;
+    padding-left: 20px;
+    padding-right: 20px;
+    white-space: nowrap;
 }
 
-td:nth-child(2),
-th:nth-child(2) {
+th:nth-child(2),
+td:nth-child(2) {
     min-width: 52px;
+    text-align: center;
+    white-space: nowrap;
 }
 
+th:nth-child(3),
 td:nth-child(3),
-th:nth-child(3) {
-    min-width: 95px;
-}
-
+th:nth-child(4),
 td:nth-child(4),
-th:nth-child(4) {
+th:nth-child(5),
+td:nth-child(5) {
+    text-align: left;
     min-width: 90px;
 }
 
-td:nth-child(5),
-th:nth-child(5) {
-    min-width: 97px;
+th:nth-child(6),
+td:nth-child(6) {
+    width: 35px;
+    text-align: center;
+    padding-right: 40px;
+    white-space: nowrap;
 }
 
-td:nth-child(6),
-th:nth-child(6) {
-    width: 35px;
-    padding-right: 87px;
+td:nth-child(3),
+td:nth-child(5) {
+    letter-spacing: 0;
+    white-space: nowrap;
 }
 
 @media (min-width: 1400px) and (max-width: 1540px) {
@@ -228,7 +246,6 @@ th:nth-child(6) {
 
     .table {
         font-size: 12px;
-        letter-spacing: 0.1em;
     }
 
     .table tr {

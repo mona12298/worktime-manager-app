@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Carbon\Carbon;
-use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Attendance;
 use App\Models\CorrectionRequest;
@@ -33,7 +32,7 @@ class UserController extends Controller
             'attendanceMap',
             'year',
             'month',
-            'userId',
+            'userId'
         ));
     }
 
@@ -41,120 +40,200 @@ class UserController extends Controller
     {
         $attendance = Attendance::with(['user', 'workBreaks'])->findOrFail($id);
 
-        $latestRequest = \App\Models\CorrectionRequest::where('attendance_id', $id)
+        $pendingRequests = CorrectionRequest::where('attendance_id', $id)
             ->where('status', 'pending')
-            ->latest()
-            ->first();
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $pending = $pendingRequests->isNotEmpty();
+
+        $pendingClockIn = $pendingRequests->firstWhere('column_name', 'clock_in');
+        $pendingClockOut = $pendingRequests->firstWhere('column_name', 'clock_out');
+
+        $display_clock_in = $pendingClockIn
+            ? Carbon::parse($pendingClockIn->corrected_value)->format('H:i')
+            : (optional($attendance->clock_in)->format('H:i') ?? '');
+
+        $display_clock_out = $pendingClockOut
+            ? Carbon::parse($pendingClockOut->corrected_value)->format('H:i')
+            : (optional($attendance->clock_out)->format('H:i') ?? '');
 
         $breaks = $attendance->workBreaks->sortBy('occurred_at')->values();
         $pairedBreaks = [];
 
-        // 最初の2ペアはH:iフォーマットで保存
-        for ($i = 0; $i < 2; $i++) {
-            $start = $breaks->get($i * 2);
-            $end = $breaks->get($i * 2 + 1);
+        $pendingByWorkBreakStart = [];
+        $pendingByWorkBreakEnd = [];
+        $pendingNullWorkBreakStart = null;
+        $pendingNullWorkBreakEnd = null;
 
-            $startVal = $start ? $start->occurred_at : null;
-            $endVal = $end ? $end->occurred_at : null;
-
-            $pairedBreaks[] = [
-                // 元の日時（安全にnullも含む）
-                'start' => $startVal,
-                'end' => $endVal,
-                'start_id' => $start ? $start->id : null,
-                'end_id' => $end ? $end->id : null,
-                // 追加：フォーマット済み時間（ビュー用）
-                'formatted_start' => $startVal ? \Carbon\Carbon::parse($startVal)->format('H:i') : '',
-                'formatted_end' => $endVal ? \Carbon\Carbon::parse($endVal)->format('H:i') : '',
-            ];
-        }
-
-        // 3ペア目以降も同様にH:iフォーマットを付与
-        for ($i = 2; $i * 2 < $breaks->count(); $i++) {
-            $start = $breaks->get($i * 2);
-            $end = $breaks->get($i * 2 + 1);
-
-            $startVal = $start ? $start->occurred_at : null;
-            $endVal = $end ? $end->occurred_at : null;
-
-            $pairedBreaks[] = [
-                'start' => $startVal,
-                'end' => $endVal,
-                'start_id' => $start ? $start->id : null,
-                'end_id' => $end ? $end->id : null,
-                'formatted_start' => $startVal ? \Carbon\Carbon::parse($startVal)->format('H:i') : '',
-                'formatted_end' => $endVal ? \Carbon\Carbon::parse($endVal)->format('H:i') : '',
-            ];
-        }
-
-        return view('user_detail', compact('attendance', 'pairedBreaks', 'latestRequest'));
-    }
-
-
-    public function storeUserCorrectionRequest(CorrectionFormRequest $request, $id){
-        $allRequests = $request->input('requests', []);
-        $reason      = $request->input('reason');
-
-        foreach ($allRequests as $key => $data) {
-            if (empty($data['corrected_value'])) {
-                continue; // 空の修正はスキップ
-            }
-
-            $attendance = isset($data['attendance_id']) ? Attendance::find($data['attendance_id']) : null;
-
-            if (empty($data['attendance_id']) && !empty($data['work_break_id'])) {
-                $workBreak             = WorkBreak::find($data['work_break_id']);
-                $data['attendance_id'] = $workBreak ? $workBreak->attendance_id : null;
-                $attendance            = $workBreak
-                                            ? Attendance::find($workBreak->attendance_id)
-                                            : null;
-            }
-
-            if (!$attendance) {
+        foreach ($pendingRequests as $req) {
+            if (!in_array($req->column_name, ['start', 'end'])) {
                 continue;
             }
 
-            // original_value（DBから）
-            if (in_array($data['column_name'], ['start', 'end'])) {
+            if ($req->work_break_id) {
+                if ($req->column_name === 'start') {
+                    $pendingByWorkBreakStart[$req->work_break_id] = $req;
+                } else {
+                    $pendingByWorkBreakEnd[$req->work_break_id] = $req;
+                }
+            } else {
+                if ($req->column_name === 'start' && !$pendingNullWorkBreakStart) {
+                    $pendingNullWorkBreakStart = $req;
+                }
+                if ($req->column_name === 'end' && !$pendingNullWorkBreakEnd) {
+                    $pendingNullWorkBreakEnd = $req;
+                }
+            }
+        }
+
+        for ($i = 0; $i * 2 < $breaks->count(); $i++) {
+            $start = $breaks->get($i * 2);
+            $end = $breaks->get($i * 2 + 1);
+
+            $startVal = $start ? $start->occurred_at : null;
+            $endVal = $end ? $end->occurred_at : null;
+
+            $display_start = '';
+            $display_end = '';
+
+            if ($start && isset($pendingByWorkBreakStart[$start->id])) {
+                $display_start = Carbon::parse($pendingByWorkBreakStart[$start->id]->corrected_value)->format('H:i');
+            } else {
+                $display_start = $startVal ? Carbon::parse($startVal)->format('H:i') : '';
+            }
+
+            if ($end && isset($pendingByWorkBreakEnd[$end->id])) {
+                $display_end = Carbon::parse($pendingByWorkBreakEnd[$end->id]->corrected_value)->format('H:i');
+            } else {
+                $display_end = $endVal ? Carbon::parse($endVal)->format('H:i') : '';
+            }
+
+            $pairedBreaks[] = [
+                'start' => $startVal,
+                'end' => $endVal,
+                'start_id' => $start ? $start->id : null,
+                'end_id' => $end ? $end->id : null,
+                'formatted_start' => $startVal ? Carbon::parse($startVal)->format('H:i') : '',
+                'formatted_end' => $endVal ? Carbon::parse($endVal)->format('H:i') : '',
+                'display_start' => $display_start,
+                'display_end' => $display_end,
+            ];
+        }
+
+        if (count($pairedBreaks) === 0) {
+            $pairedBreaks[] = [
+                'start' => null,
+                'end' => null,
+                'start_id' => null,
+                'end_id' => null,
+                'formatted_start' => '',
+                'formatted_end' => '',
+                'display_start' => '',
+                'display_end' => '',
+            ];
+        }
+
+        if ($pendingNullWorkBreakStart) {
+            $pairedBreaks[0]['display_start'] = Carbon::parse($pendingNullWorkBreakStart->corrected_value)->format('H:i');
+            if (empty($pairedBreaks[0]['formatted_start'])) {
+                $pairedBreaks[0]['formatted_start'] = Carbon::parse($pendingNullWorkBreakStart->corrected_value)->format('H:i');
+            }
+        }
+        if ($pendingNullWorkBreakEnd) {
+            $pairedBreaks[0]['display_end'] = Carbon::parse($pendingNullWorkBreakEnd->corrected_value)->format('H:i');
+            if (empty($pairedBreaks[0]['formatted_end'])) {
+                $pairedBreaks[0]['formatted_end'] = Carbon::parse($pendingNullWorkBreakEnd->corrected_value)->format('H:i');
+            }
+        }
+
+        $latestRequest = $pendingRequests->first();
+
+        return view('user_detail', compact(
+            'attendance',
+            'pairedBreaks',
+            'latestRequest',
+            'pending',
+            'display_clock_in',
+            'display_clock_out'
+        ));
+    }
+
+    public function storeUserCorrectionRequest(CorrectionFormRequest $request, $id)
+    {
+        $allRequests = $request->input('requests', []);
+        $reason = $request->input('reason');
+
+        foreach ($allRequests as $key => $data) {
+            if (empty($data['corrected_value'])) continue;
+
+            $attendance = isset($data['attendance_id']) ? Attendance::find($data['attendance_id']) : null;
+            if (empty($data['attendance_id']) && !empty($data['work_break_id'])) {
                 $workBreak = WorkBreak::find($data['work_break_id']);
-                $orig = $workBreak && $workBreak->{$data['column_name']}
-                    ? $workBreak->{$data['column_name']}->format('Y-m-d H:i:s')
+                $attendance = $workBreak ? Attendance::find($workBreak->attendance_id) : null;
+                $data['attendance_id'] = $workBreak ? $workBreak->attendance_id : null;
+            }
+            if (!$attendance) continue;
+
+            if (in_array($data['column_name'], ['start', 'end'])) {
+                $workBreak = !empty($data['work_break_id']) ? WorkBreak::find($data['work_break_id']) : null;
+                $orig = $workBreak && $workBreak->occurred_at
+                    ? Carbon::parse($workBreak->occurred_at)->format('Y-m-d H:i:s')
                     : null;
             } else {
                 $column = $data['column_name'];
                 $orig = $attendance->$column
-                    ? $attendance->$column->format('Y-m-d H:i:s')
+                    ? Carbon::parse($attendance->$column)->format('Y-m-d H:i:s')
                     : null;
             }
 
-            // corrected_value（フォームから）
             if (in_array($data['column_name'], ['start', 'end'])) {
-                $corr = $attendance->clock_in->format('Y-m-d')
-                    . ' '
-                    . trim($data['corrected_value'])
-                    . ':00';
+                $corr = Carbon::parse($attendance->clock_in)
+                            ->setTimeFromTimeString($data['corrected_value'])
+                            ->format('Y-m-d H:i:s');
             } else {
-                $corr = $this->mergeDateTime(
-                    $orig,
-                    $data['corrected_value']
-                );
+                $corr = $this->mergeDateTime($orig, $data['corrected_value']);
+                if ($data['column_name'] === 'clock_in' && $attendance->clock_out && $corr > Carbon::parse($attendance->clock_out)->format('Y-m-d H:i:s')) {
+                    $corr = Carbon::parse($corr)->subDay()->format('Y-m-d H:i:s');
+                }
+                if ($data['column_name'] === 'clock_out' && $attendance->clock_in && $corr < Carbon::parse($attendance->clock_in)->format('Y-m-d H:i:s')) {
+                    $corr = Carbon::parse($corr)->addDay()->format('Y-m-d H:i:s');
+                }
+            }
+
+            $existingPending = CorrectionRequest::where('attendance_id', $data['attendance_id'])
+                ->where('column_name', $data['column_name'])
+                ->where('work_break_id', $data['work_break_id'] ?? null)
+                ->where('status', 'pending')
+                ->first();
+
+            if ($existingPending) {
+                if ($existingPending->corrected_value === $corr && $existingPending->reason === $reason) {
+                    continue;
+                }
+                $existingPending->update([
+                    'corrected_value' => $corr,
+                    'reason' => $reason,
+                    'user_id' => auth()->id(),
+                ]);
+                continue;
             }
 
             CorrectionRequest::create([
-                'user_id'         => auth()->id(),
-                'attendance_id'   => $data['attendance_id'],
-                'work_break_id'   => $data['work_break_id'] ?? null,
-                'column_name'     => $data['column_name'],
-                'original_value'  => $orig,
+                'user_id' => auth()->id(),
+                'attendance_id' => $data['attendance_id'],
+                'work_break_id' => $data['work_break_id'] ?? null,
+                'column_name' => $data['column_name'],
+                'original_value' => $orig,
                 'corrected_value' => $corr,
-                'reason'          => $reason,
-                'status'          => 'pending',
+                'reason' => $reason,
+                'status' => 'pending',
+                'requested_at' => Carbon::now(),
             ]);
         }
 
         return redirect()->back();
     }
-
 
     private function mergeDateTime(?string $original, ?string $correctedTime): ?string
     {
@@ -162,7 +241,6 @@ class UserController extends Controller
             return null;
         }
 
-        // フル形式（すでに Y-m-d H:i:s）の場合はそのまま
         if (preg_match('/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}(:\d{2})?$/', $correctedTime)) {
             return $correctedTime;
         }
@@ -177,9 +255,8 @@ class UserController extends Controller
         return $timePart ? $datePart . ' ' . $timePart : null;
     }
 
-
-    public function indexUserStampRequests(){
-
+    public function indexUserStampRequests()
+    {
         $user = Auth::user();
 
         $pendingRequests = $user->correctionRequests()
@@ -200,12 +277,13 @@ class UserController extends Controller
             ->get()
             ->groupBy('attendance_id')
             ->map(function ($requests) {
-                return $requests->first();
+                $req = $requests->first();
+                $req->display_approved_at = $req->approved_at ? Carbon::parse($req->approved_at)->format('Y/m/d') : '-';
+                return $req;
             });
 
         return view('user_request', compact(
-            'pendingRequests', 'approvedRequests','latestRequests'
+            'pendingRequests', 'approvedRequests', 'latestRequests'
         ));
     }
-
 }

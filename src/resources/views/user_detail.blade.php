@@ -28,13 +28,6 @@
             <div class="ttl-txt">勤怠一覧</div>
         </div>
 
-        @php
-            $pending = \App\Models\CorrectionRequest::where('attendance_id', $attendance->id)
-                ->whereIn('column_name', ['clock_in', 'clock_out', 'start', 'end'])
-                ->where('status', 'pending')
-                ->exists();
-        @endphp
-
         @if ($pending)
         {{-- 修正申請中：フォーム非表示 --}}
         <table class="table">
@@ -49,21 +42,23 @@
             </tr>
             <tr>
                 <th>出勤・退勤</th>
-                <td class="table-display__in">{{ optional($attendance->clock_in)->format('H:i') }}</td>
-                <td class="range-separator">〜</td>
-                <td class="table-display__out">{{ optional($attendance->clock_out)->format('H:i') }}</td>
+                <td class="table-display__in">{{ $display_clock_in }}</td>
+                <td class="range-separator display-mode">〜</td>
+                <td class="table-display__out">{{ $display_clock_out }}</td>
             </tr>
 
+            {{-- 休憩行：1行目は必ず表示、2行目以降は start/end 両方あれば表示 --}}
             @foreach ($pairedBreaks as $index => $break)
                 @php
-                    $hasBothBreaks = $break['start'] && $break['end'];
+                    $hasBothBreaks = (!empty($break['display_start']) && !empty($break['display_end']));
                 @endphp
-                @if ((($index < 1) && !empty($break['start'])) || $hasBothBreaks)
+
+                @if ($index === 0 || $hasBothBreaks)
                 <tr>
                     <th>{{ $index === 0 ? '休憩' : '休憩' . ($index + 1) }}</th>
-                    <td class="table-display__in">{{ $break['start'] ? \Carbon\Carbon::parse($break['start'])->format('H:i') : '' }}</td>
-                    <td class="range-separator">〜</td>
-                    <td class="table-display__out">{{ $break['end'] ? \Carbon\Carbon::parse($break['end'])->format('H:i') : '' }}</td>
+                    <td class="table-display__in">{{ $break['display_start'] }}</td>
+                    <td class="range-separator display-mode">〜</td>
+                    <td class="table-display__out">{{ $break['display_end'] }}</td>
                 </tr>
                 @endif
             @endforeach
@@ -100,7 +95,7 @@
                         <input type="hidden" name="requests[clock_in][original_value]" value="{{ optional($attendance->clock_in)->format('Y-m-d H:i:s') }}">
                         <input type="text" class="table-input__in" name="requests[clock_in][corrected_value]" value="{{ old('requests.clock_in.corrected_value', optional($attendance->clock_in)->format('H:i')) }}">
                     </td>
-                    <td class="range-separator">〜</td>
+                    <td class="range-separator input-mode">〜</td>
                     <td>
                         <input type="hidden" name="requests[clock_out][column_name]" value="clock_out">
                         <input type="hidden" name="requests[clock_out][attendance_id]" value="{{ $attendance->id }}">
@@ -109,6 +104,7 @@
                     </td>
                 </tr>
 
+                {{-- フォーム側の休憩行：pairedBreaks の数だけ表示（pairedBreaks は最低1要素） --}}
                 @foreach ($pairedBreaks as $index => $break)
                 <tr>
                     <th>{{ $index === 0 ? '休憩' : '休憩' . ($index + 1) }}</th>
@@ -116,14 +112,18 @@
                         <input type="hidden" name="requests[break_{{ $index }}_in][column_name]" value="start">
                         <input type="hidden" name="requests[break_{{ $index }}_in][work_break_id]" value="{{ $break['start_id'] }}">
                         <input type="hidden" name="requests[break_{{ $index }}_in][original_value]" value="{{ $break['start'] }}">
-                        <input type="text" class="table-input__in" name="requests[break_{{ $index }}_in][corrected_value]" value="{{ old("requests.break_{$index}_in.corrected_value", $break['start'] ? optional(\Carbon\Carbon::parse($break['start']))->format('H:i') : '') }}">
+                        <input type="text" class="table-input__in"
+                               name="requests[break_{{ $index }}_in][corrected_value]"
+                               value="{{ old("requests.break_{$index}_in.corrected_value", $break['formatted_start']) }}">
                     </td>
-                    <td class="range-separator">〜</td>
+                    <td class="range-separator {{ $pending ? 'display-mode break' : 'input-mode' }}">〜</td>
                     <td>
                         <input type="hidden" name="requests[break_{{ $index }}_out][column_name]" value="end">
                         <input type="hidden" name="requests[break_{{ $index }}_out][work_break_id]" value="{{ $break['end_id'] }}">
                         <input type="hidden" name="requests[break_{{ $index }}_out][original_value]" value="{{ $break['end'] }}">
-                        <input type="text" class="table-input__out" name="requests[break_{{ $index }}_out][corrected_value]" value="{{ old("requests.break_{$index}_out.corrected_value", $break['end'] ? optional(\Carbon\Carbon::parse($break['end']))->format('H:i') : '') }}">
+                        <input type="text" class="table-input__out"
+                               name="requests[break_{{ $index }}_out][corrected_value]"
+                               value="{{ old("requests.break_{$index}_out.corrected_value", $break['formatted_end']) }}">
                     </td>
                 </tr>
                 @endforeach

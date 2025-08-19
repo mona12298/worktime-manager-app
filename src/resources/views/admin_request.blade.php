@@ -38,6 +38,8 @@
             <div class="tabs__item is-active">承認待ち</div>
             <div class="tabs__item">承認済み</div>
         </div>
+
+        {{-- ================= 承認待ち ================= --}}
         <div class="tab-content active">
             <table class="table">
                 <tr>
@@ -48,20 +50,38 @@
                     <th>申請日時</th>
                     <th>詳細</th>
                 </tr>
-                @foreach ($correctionRequests->where('status', 'pending') as $req)
-                <tr>
-                    <td>{{$req->status_label}}</td>
-                    <td>{{$req->user->name}}</td>
-                    <td>{{$req->attendance->date->format('Y-m-d')}}</td>
-                    <td>{{$req->reason}}</td>
-                    <td>{{optional($req->approved_at)->format('Y-m-d')}}</td>
-                    <td>
-                        <a href="/attendance/{{ $req->attendance->id}}">詳細</a>
-                    </td>
-                </tr>
+
+                @php
+                    // 同一申請を1グループにまとめるためのキーを作成
+                    $pendingGroups = $correctionRequests
+                        ->where('status', 'pending')
+                        ->groupBy(function($r) {
+                            // アンカーは attendance_id。無ければ work_break_id を使う（親勤怠に紐づく想定）
+                            $anchor = $r->attendance_id ?: ('wb-'.$r->work_break_id);
+                            $ts = optional($r->requested_at)->format('Y/m/d H:i:s'); // 申請時刻
+                            // user / anchor / status / requested_at / reason で同一申請とみなす
+                            return $r->user_id.'|'.$anchor.'|'.$r->status.'|'.$ts.'|'.md5((string)$r->reason);
+                        });
+                @endphp
+
+                @foreach ($pendingGroups as $group)
+                    @php $first = $group->first(); @endphp
+                    <tr>
+                        <td>{{ $first->status_label }}</td>
+                        <td>{{ $first->user->name }}</td>
+                        <td>{{ $first->display_date }}</td>
+                        <td>{{ $first->reason }}</td>
+                        <td>{{ optional($first->requested_at)->format('Y/m/d') ?? optional($first->created_at)->format('Y/m/d') }}</td>
+                        <td>
+                            {{-- 代表ID（first）へ飛ばす。グループ内の詳細は遷移先でまとめて表示してもOK --}}
+                            <a href="/stamp_correction_request/approve/{{ $first->id }}">詳細</a>
+                        </td>
+                    </tr>
                 @endforeach
             </table>
         </div>
+
+        {{-- ================= 承認済み ================= --}}
         <div class="tab-content">
             <table class="table">
                 <tr>
@@ -72,17 +92,29 @@
                     <th>申請日時</th>
                     <th>詳細</th>
                 </tr>
-                @foreach ($correctionRequests->where('status', 'approved') as $req)
-                <tr>
-                    <td>{{$req->status_label}}</td>
-                    <td>{{$req->user->name}}</td>
-                    <td>{{$req->attendance->date->format('Y-m-d')}}</td>
-                    <td>{{$req->reason}}</td>
-                    <td>{{optional($req->approved_at)->format('Y-m-d')}}</td>
-                    <td>
-                        <a href="/stamp_correction_request/approve/{attendance_correct_request}">詳細</a>
-                    </td>
-                </tr>
+
+                @php
+                    $approvedGroups = $correctionRequests
+                        ->where('status', 'approved')
+                        ->groupBy(function($r) {
+                            $anchor = $r->attendance_id ?: ('wb-'.$r->work_break_id);
+                            $ts = optional($r->requested_at)->format('Y/m/d H:i:s');
+                            return $r->user_id.'|'.$anchor.'|'.$r->status.'|'.$ts.'|'.md5((string)$r->reason);
+                        });
+                @endphp
+
+                @foreach ($approvedGroups as $group)
+                    @php $first = $group->first(); @endphp
+                    <tr>
+                        <td>{{ $first->status_label }}</td>
+                        <td>{{ $first->user->name }}</td>
+                        <td>{{ $first->display_date }}</td>
+                        <td>{{ $first->reason }}</td>
+                        <td>{{ optional($first->approved_at)->format('Y/m/d') }}</td>
+                        <td>
+                            <a href="/stamp_correction_request/approve/{{ $first->id }}">詳細</a>
+                        </td>
+                    </tr>
                 @endforeach
             </table>
         </div>

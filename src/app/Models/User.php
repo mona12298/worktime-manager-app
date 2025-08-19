@@ -20,8 +20,7 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
-        'password',
-        'is_admin'
+        'password'
     ];
 
     /**
@@ -49,10 +48,6 @@ class User extends Authenticatable
 
     public function correctionRequests(){
         return $this->hasMany('App\Models\CorrectionRequest');
-    }
-
-    public function isAdmin(){
-        return $this->is_admin;
     }
 }
 

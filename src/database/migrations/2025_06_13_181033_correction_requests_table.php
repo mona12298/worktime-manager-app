@@ -23,6 +23,7 @@ class CorrectionRequestsTable extends Migration
             $table->datetime('corrected_value');
             $table->text('reason');
             $table->enum('status', ['pending', 'approved'])->default('pending')->index();
+            $table->timestamp('requested_at');
             $table->timestamp('approved_at')->nullable();
             $table->timestamps();
         });

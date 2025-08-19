@@ -10,11 +10,6 @@ class CustomLoginResponse implements LoginResponseContract
     public function toResponse($request)
     {
         $user = auth()->user();
-
-        if ($user->is_admin) {
-            return redirect('/admin/attendance/list');
-        }
-
         return redirect('/attendance');
     }
 }
