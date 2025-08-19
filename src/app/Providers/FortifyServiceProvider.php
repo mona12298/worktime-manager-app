@@ -2,7 +2,9 @@
 
 namespace App\Providers;
 
-
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Cookie;
 use App\Actions\Fortify\CustomLoginResponse;
 use Laravel\Fortify\Contracts\LoginResponse;
 use App\Actions\Fortify\CreateNewUser;
@@ -55,9 +57,8 @@ class FortifyServiceProvider extends ServiceProvider
         });
 
         Fortify::loginView(function (Request $request) {
-            if ($request->path() === 'admin/login'){
-                return view('auth.admin_login');
-            }
+            session()->invalidate();
+            session()->regenerateToken();
             return view('auth.user_login');
         });
 

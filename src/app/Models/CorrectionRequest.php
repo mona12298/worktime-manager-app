@@ -18,7 +18,17 @@ class CorrectionRequest extends Model
         'corrected_value',
         'reason',
         'status',
-        'approved_at',
+        'requested_at',
+        'approved_at'
+    ];
+
+    protected $casts = [
+        'original_value'  => 'datetime',
+        'corrected_value' => 'datetime',
+        'requested_at'    => 'datetime',
+        'approved_at'    => 'datetime',
+        'created_at'      => 'datetime',
+        'updated_at'      => 'datetime',
     ];
 
     public function user(){

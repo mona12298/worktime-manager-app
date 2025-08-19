@@ -14,6 +14,14 @@ class Authenticate extends Middleware
      */
     protected function redirectTo($request)
     {
+
+        \Log::info('Redirect triggered', [
+        'url' => $request->fullUrl(),
+        'guard' => auth()->getDefaultDriver(),
+        'admin_check' => auth('admin')->check(),
+        'web_check' => auth('web')->check(),
+    ]);
+
         if (! $request->expectsJson()) {
             return route('login');
         }

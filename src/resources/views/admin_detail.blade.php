@@ -31,10 +31,11 @@
     <div class="content">
         <div class="ttl">
             <div class="ttl-left"></div>
-            <div class="ttl-txt">勤怠一覧</div>
+            <div class="ttl-txt">勤怠詳細</div>
         </div>
-        <form action="/attendance/{{ $attendance->id }}" method="post">
-            @csrf
+
+        @if (!empty($pending))
+            {{-- 承認待ち: 表示モード --}}
             <table class="table">
                 <tr>
                     <th>名前</th>
@@ -42,86 +43,105 @@
                 </tr>
                 <tr>
                     <th>日付</th>
-                    <td class="year">{{ \Carbon\Carbon::parse($attendance->date)->format('Y年') }}</td>
-                    <td class="date">{{ \Carbon\Carbon::parse($attendance->date)->format('n月j日') }}</td>
+                    <td class="year">{{ $displayYear }}</td>
+                    <td class="date">{{ $displayDate }}</td>
                 </tr>
                 <tr>
                     <th>出勤・退勤</th>
-                    <td>
-                        <input type="hidden" name="requests[clock_in][column_name]" value="clock_in">
-                        <input type="hidden" name="requests[clock_in][original_value]" value="{{ $attendance->clock_in }}">
-                        <input type="hidden" name="requests[clock_in][attendance_id]" value="{{ $attendance->id }}">
-                        <input type="text" id="clock_in" name="requests[clock_in][corrected_value]" class="table-input__in" value="{{ old('requests.clock_in.corrected_value', optional($attendance->clock_in)->format('H:i')) }}">
-                    </td>
-                    <td class="range-separator">〜</td>
-                    <td>
-                        <input type="hidden" name="requests[clock_out][column_name]" value="clock_out">
-                        <input type="hidden" name="requests[clock_out][original_value]" value="{{ $attendance->clock_out }}">
-                        <input type="hidden" name="requests[clock_out][attendance_id]" value="{{ $attendance->id }}">
-                        <input type="text" id="clock_out" name="requests[clock_out][corrected_value]" class="table-input__out" value="{{ old('requests.clock_out.corrected_value', optional($attendance->clock_out)->format('H:i')) }}">
-                    </td>
+                    <td class="table-display__in">{{ $display_clock_in }}</td>
+                    <td class="range-separator display-mode">〜</td>
+                    <td class="table-display__out">{{ $display_clock_out }}</td>
                 </tr>
 
-                @php
-                    $breaks = $attendance->workBreaks;
-                @endphp
-
-                @for ($i = 0; $i < 2; $i++)
+                @foreach ($pairedBreaks as $index => $break)
                 <tr>
-                    <th>休憩{{ $i === 0 ? '' : '２' }}</th>
-                    <td>
-                        <input type="hidden" name="requests[break_{{ $i }}_in][column_name]" value="start">
-                        <input type="hidden" name="requests[break_{{ $i }}_in][original_value]" value="{{ optional($breaks[$i] ?? null)->break_in }}">
-                        <input type="hidden" name="requests[break_{{ $i }}_in][work_break_id]" value="{{ optional($breaks[$i] ?? null)->id }}">
-                        <input type="text" id="break_{{ $i }}_in" name="requests[break_{{ $i }}_in][corrected_value]" class="table-input__in" value="{{ old('requests.break_'.$i.'_in.corrected_value', optional($breaks[$i] ?? null)->break_in ? \Carbon\Carbon::parse($breaks[$i]->break_in)->format('H:i') : '') }}">
-                    </td>
-                    <td class="range-separator">〜</td>
-                    <td>
-                        <input type="hidden" name="requests[break_{{ $i }}_out][column_name]" value="end">
-                        <input type="hidden" name="requests[break_{{ $i }}_out][original_value]" value="{{ optional($breaks[$i] ?? null)->break_out }}">
-                        <input type="hidden" name="requests[break_{{ $i }}_out][work_break_id]" value="{{ optional($breaks[$i] ?? null)->id }}">
-                        <input type="text" id="break_{{ $i }}_out" name="requests[break_{{ $i }}_out][corrected_value]" class="table-input__out" value="{{ old('requests.break_'.$i.'_out.corrected_value', optional($breaks[$i] ?? null)->break_out ? \Carbon\Carbon::parse($breaks[$i]->break_out)->format('H:i') : '') }}">
-                    </td>
-                </tr>
-                @endfor
-
-                @foreach ($breaks->slice(2) as $index => $break)
-                <tr>
-                    <th>休憩{{ $index + 3 }}</th>
-                    <td>
-                        <input type="hidden" name="requests[break_{{ $index + 2 }}_in][column_name]" value="start">
-                        <input type="hidden" name="requests[break_{{ $index + 2 }}_in][original_value]" value="{{ $break->break_in }}">
-                        <input type="hidden" name="requests[break_{{ $index + 2 }}_in][work_break_id]" value="{{ $break->id }}">
-                        <input type="text" id="break_{{ $index + 2 }}_in" name="requests[break_{{ $index + 2 }}_in][corrected_value]" class="table-input__in" value="{{ old('requests.break_'.($index + 2).'_in.corrected_value', optional($break->break_in)->format('H:i')) }}">
-                    </td>
-                    <td class="range-separator">〜</td>
-                    <td>
-                        <input type="hidden" name="requests[break_{{ $index + 2 }}_out][column_name]" value="end">
-                        <input type="hidden" name="requests[break_{{ $index + 2 }}_out][original_value]" value="{{ $break->break_out }}">
-                        <input type="hidden" name="requests[break_{{ $index + 2 }}_out][work_break_id]" value="{{ $break->id }}">
-                        <input type="text" id="break_{{ $index + 2 }}_out" name="requests[break_{{ $index + 2 }}_out][corrected_value]" class="table-input__out" value="{{ old('requests.break_'.($index + 2).'_out.corrected_value', optional($break->break_out)->format('H:i')) }}">
-                    </td>
+                    <th>{{ $index === 0 ? '休憩' : '休憩' . ($index + 1) }}</th>
+                    <td class="table-display__in">{{ $break['formatted_start'] }}</td>
+                    <td class="range-separator display-mode break">〜</td>
+                    <td class="table-display__out">{{ $break['formatted_end'] }}</td>
                 </tr>
                 @endforeach
 
                 <tr>
                     <th>備考</th>
-                    <td class="table-textarea" colspan="3">
-                        <textarea name="reason">{{ old('reason') }}</textarea>
-                    </td>
+                    <td class="table-textarea" colspan="3">{{ $latestRequest->reason ?? '-' }}</td>
                 </tr>
             </table>
 
-            <div class="form__error">
-                @foreach ($errors->all() as $error)
-                    <p>{{ $error }}</p>
-                @endforeach
-            </div>
+        @else
+            {{-- 編集可能: フォーム表示 --}}
+            <form action="{{ url('/attendance/' . $attendance->id) }}" method="post">
+                @csrf
+                <table class="table">
+                    <tr>
+                        <th>名前</th>
+                        <td class="name">{{ $attendance->user->name }}</td>
+                    </tr>
+                    <tr>
+                        <th>日付</th>
+                        <td class="year">{{ $displayYear }}</td>
+                        <td class="date">{{ $displayDate }}</td>
+                    </tr>
+                    <tr>
+                        <th>出勤・退勤</th>
+                        <td>
+                            <input type="hidden" name="requests[clock_in][column_name]" value="clock_in">
+                            <input type="hidden" name="requests[clock_in][attendance_id]" value="{{ $attendance->id }}">
+                            <input type="hidden" name="requests[clock_in][original_value]" value="{{ optional($attendance->clock_in)->format('Y-m-d H:i:s') }}">
+                            <input type="text" id="clock_in" class="table-input__in" name="requests[clock_in][corrected_value]" value="{{ old('requests.clock_in.corrected_value', $display_clock_in === '-' ? (optional($attendance->clock_in)->format('H:i') ?? '') : $display_clock_in) }}">
+                        </td>
+                        <td class="range-separator input-mode">〜</td>
+                        <td>
+                            <input type="hidden" name="requests[clock_out][column_name]" value="clock_out">
+                            <input type="hidden" name="requests[clock_out][attendance_id]" value="{{ $attendance->id }}">
+                            <input type="hidden" name="requests[clock_out][original_value]" value="{{ optional($attendance->clock_out)->format('Y-m-d H:i:s') }}">
+                            <input type="text" id="clock_out" class="table-input__out" name="requests[clock_out][corrected_value]" value="{{ old('requests.clock_out.corrected_value', $display_clock_out === '-' ? (optional($attendance->clock_out)->format('H:i') ?? '') : $display_clock_out) }}">
+                        </td>
+                    </tr>
 
-            <div class="form-btn">
-                <input type="submit" value="修正">
-            </div>
-        </form>
+                    @foreach ($pairedBreaks as $index => $break)
+                    <tr>
+                        <th>{{ $index === 0 ? '休憩' : '休憩' . ($index + 1) }}</th>
+                        <td>
+                            <input type="hidden" name="requests[break_{{ $index }}_in][column_name]" value="start">
+                            <input type="hidden" name="requests[break_{{ $index }}_in][work_break_id]" value="{{ $break['start_id'] ?? '' }}">
+                            <input type="hidden" name="requests[break_{{ $index }}_in][original_value]" value="{{ $break['start'] ?? '' }}">
+                            <input type="text" id="break_{{ $index }}_in" class="table-input__in"
+                                   name="requests[break_{{ $index }}_in][corrected_value]"
+                                   value="{{ old("requests.break_{$index}_in.corrected_value", $break['formatted_start'] ?? '') }}">
+                        </td>
+                        <td class="range-separator input-mode">〜</td>
+                        <td>
+                            <input type="hidden" name="requests[break_{{ $index }}_out][column_name]" value="end">
+                            <input type="hidden" name="requests[break_{{ $index }}_out][work_break_id]" value="{{ $break['end_id'] ?? '' }}">
+                            <input type="hidden" name="requests[break_{{ $index }}_out][original_value]" value="{{ $break['end'] ?? '' }}">
+                            <input type="text" id="break_{{ $index }}_out" class="table-input__out"
+                                   name="requests[break_{{ $index }}_out][corrected_value]"
+                                   value="{{ old("requests.break_{$index}_out.corrected_value", $break['formatted_end'] ?? '') }}">
+                        </td>
+                    </tr>
+                    @endforeach
+
+                    <tr>
+                        <th>備考</th>
+                        <td class="table-display__text" colspan="3">
+                            <textarea name="reason">{{ old('reason', optional($latestRequest)->reason) }}</textarea>
+                        </td>
+                    </tr>
+                </table>
+
+                <div class="form__error">
+                    @foreach (collect($errors->all())->unique() as $error)
+                        <p>{{ $error }}</p>
+                    @endforeach
+                </div>
+
+                <div class="correction">
+                    <input type="submit" value="修正">
+                </div>
+            </form>
+        @endif
+
     </div>
 </div>
 @endsection
@@ -129,19 +149,21 @@
 @section('js')
 <script>
     document.addEventListener('DOMContentLoaded', () => {
-        const times = {
-            clock_in: '{{ optional($attendance->clock_in)->format("H:i") ?? '' }}',
-            clock_out: '{{ optional($attendance->clock_out)->format("H:i") ?? '' }}',
+        const displayIn = '{{ $display_clock_in ?? '' }}';
+        const displayOut = '{{ $display_clock_out ?? '' }}';
+        const paired = @json($pairedBreaks);
 
-            @foreach ($attendance->workBreaks as $index => $break)
-            break_{{ $index }}_in: '{{ optional($break->break_in)->format("H:i") ?? '' }}',
-            break_{{ $index }}_out: '{{ optional($break->break_out)->format("H:i") ?? '' }}',
-            @endforeach
-        };
+        const elClockIn = document.getElementById('clock_in');
+        const elClockOut = document.getElementById('clock_out');
 
-        Object.entries(times).forEach(([id, val]) => {
-            const el = document.getElementById(id);
-            if (el) el.value = val || '';
+        if (elClockIn) elClockIn.value = elClockIn.value || displayIn || '';
+        if (elClockOut) elClockOut.value = elClockOut.value || displayOut || '';
+
+        paired.forEach((b, idx) => {
+            const elIn = document.getElementById(`break_${idx}_in`);
+            const elOut = document.getElementById(`break_${idx}_out`);
+            if (elIn) elIn.value = elIn.value || (b.formatted_start ?? '') || '';
+            if (elOut) elOut.value = elOut.value || (b.formatted_end ?? '') || '';
         });
     });
 </script>

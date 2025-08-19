@@ -131,6 +131,9 @@ return [
 
     'custom' => [
         'custom' => [
+            'reason' => [
+                'required' => '備考を記入してください。',
+            ],
             'name' => [
                 'required' => 'お名前を入力してください',
             ],

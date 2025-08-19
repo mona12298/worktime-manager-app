@@ -8,6 +8,7 @@
     width: 900px;
     min-height: 555px;
     padding-top: 93px;
+    padding-bottom: 57px;
     margin: 0 auto;
 }
 
@@ -61,6 +62,8 @@
 .table td {
     font-weight: 700;
     font-size: 16px;
+    text-align: left;
+    padding-left: 24px;
 }
 
 .year,
@@ -69,11 +72,21 @@
 }
 
 .date {
-    padding-left: 142px;
+    margin-left: 122px;
 }
 
-.range-separator {
+.range-separator.input-mode {
     padding: 0 51px 0 43px;
+    text-align: left;
+}
+
+.range-separator.display-mode {
+    padding: 0 51px 0 67px;
+    text-align: center;
+}
+
+.range-separator.display-mode.break {
+    margin-left: 60px;
 }
 
 .table-input__in,
@@ -92,7 +105,7 @@
     font-size: 16px;
 }
 
-.table-textarea textarea {
+.table-display__text textarea {
     appearance: none;
     -webkit-appearance: none;
     -moz-appearance: none;
@@ -102,12 +115,12 @@
     border: 1px solid #D9D9D9;
 }
 
-.form-btn {
+.correction {
     padding: 36px 0 77px;
     text-align: right;
 }
 
-.form-btn input {
+.correction input {
     appearance: none;
     -webkit-appearance: none;
     -moz-appearance: none;
@@ -173,6 +186,10 @@
         padding: 0 56px 0 48px;
     }
 
+    .range-separator.display-mode.break {
+        margin-left: 65px;
+    }
+
     .table-input__in,
     .table-input__out {
         width: 108px;
@@ -181,17 +198,17 @@
     }
 
 
-    .table-textarea textarea {
+    .table-display__text textarea {
         min-width: 341px;
         min-height: 77px;
         border-radius: 4px;
     }
 
-    .form-btn {
+    .correction {
         padding: 46px 0 87px;
     }
 
-    .form-btn input {
+    .correction input {
         width: 140px;
         height: 60px;
         font-size: 24px;
@@ -251,6 +268,10 @@
         padding: 0 41px 0 33px;
     }
 
+    .range-separator.display-mode.break {
+        margin-left: 46px;
+    }
+
     .table-input__in,
     .table-input__out {
         width: 83px;
@@ -258,16 +279,16 @@
         font-size: 12px;
     }
 
-    .table-textarea textarea {
+    .table-display__text textarea {
         min-width: 260px;
         min-height: 72px;
     }
 
-    .form-btn {
+    .correction {
         padding: 20px 0 50px;
     }
 
-    .form-btn input {
+    .correction input {
         width: 90px;
         height: 40px;
         font-size: 18px;

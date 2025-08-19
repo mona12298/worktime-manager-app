@@ -38,7 +38,7 @@ class AdminAttendanceExportController extends Controller
 
         $callback = function () use ($csvHeader, $csvData) {
             $file = fopen('php://output', 'w');
-            stream_filter_append($file, 'convert.iconv.utf-8/cp932'); // Windows対応
+            stream_filter_append($file, 'convert.iconv.utf-8/cp932');
             fputcsv($file, $csvHeader);
             foreach ($csvData as $row) {
                 fputcsv($file, $row);
