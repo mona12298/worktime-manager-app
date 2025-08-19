@@ -47,19 +47,22 @@ config/app.php で 'timezone' => 'Asia/Tokyo',へ変更<br>
 
 <h3>correction_requestsテーブル</h3>
 
-| カラム名        | 型                         | NULL許可 | 外部キー           | 備考                              |
-|-----------------|----------------------------|----------|--------------------|-----------------------------------|
-| id              | unsigned bigint            | NO       |                    | 主キー                            |
-| user_id         | unsigned bigint            | YES      | users(id)          |                                   |
-| attendance_id   | unsigned bigint            | YES      | attendances(id)    |                                   |
-| work_break_id   | unsigned bigint            | YES      | work_breaks(id)    |                                   |
-| column_name     | enum('clock_in','clock_out','start','end') | YES |                    | 修正対象カラム名                  |
-| original_value  | datetime                  | YES      |                    | 修正前の値                       |
-| corrected_value | datetime                  | YES      |                    | 修正後の値                       |
-| reason          | text                      | YES      |                    | 修正理由                        |
-| status          | enum('pending','approved') | YES      |                    | ステータス（保留 or 承認済み）  |
-| created_at      | timestamp                 | YES      |                    |                                   |
-| updated_at      | timestamp                 | YES      |                    |                                   |
+| カラム名             | 型                                            | NULL許可 | 主キー | 外部キー             |
+| ---------------- | -------------------------------------------- | ------ | --- | ---------------- |
+| id               | unsigned bigint                              | NO     | ○   |                  |
+| user\_id         | unsigned bigint                              | NO     |     | users(id)        |
+| attendance\_id   | unsigned bigint                              | NO     |     | attendances(id)  |
+| work\_break\_id  | unsigned bigint                              | YES    |     | work\_breaks(id) |
+| column\_name     | enum('clock\_in','clock\_out','start','end') | NO     |     |                  |
+| original\_value  | datetime                                     | NO     |     |                  |
+| corrected\_value | datetime                                     | NO     |     |                  |
+| reason           | text                                         | NO     |     |                  |
+| status           | enum('pending','approved')                   | NO     |     |                  |
+| requested\_at    | timestamp                                    | NO     |     |                  |
+| approved\_at     | timestamp                                    | YES    |     |                  |
+| created\_at      | timestamp                                    | YES    |     |                  |
+| updated\_at      | timestamp                                    | YES    |     |                  |
+
 
 ---
 
@@ -95,7 +98,7 @@ config/app.php で 'timezone' => 'Asia/Tokyo',へ変更<br>
 <p>Docker: Docker, docker-compose</p>
 
 <h2>ER図</h2>
-<img src="" alt="ER図">
+<img src="./worktime-manager-app.drawio.png" alt="ER図">
 
 <h2>URL</h2>
 <p>開発環境：http://localhost/</p>
